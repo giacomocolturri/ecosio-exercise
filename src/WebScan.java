@@ -19,8 +19,9 @@ public class WebScan {
     public WebScan(String startUrl) {
         this.domain = getDomain(startUrl);
         System.out.println("Start scanning...\n");
-        ForkJoinPool pool = new ForkJoinPool();
-        pool.invoke(new ScanTask(startUrl));
+        try (ForkJoinPool pool = new ForkJoinPool()) {
+            pool.invoke(new ScanTask(startUrl));
+        }
     }
 
     private class ScanTask extends RecursiveAction {
