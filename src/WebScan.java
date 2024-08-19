@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.RecursiveTask;
+import java.util.concurrent.RecursiveAction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,12 +18,12 @@ public class WebScan {
 
     public WebScan(String startUrl) {
         this.domain = getDomain(startUrl);
-        ForkJoinPool pool = new ForkJoinPool();
         System.out.println("Start scanning...\n");
+        ForkJoinPool pool = new ForkJoinPool();
         pool.invoke(new ScanTask(startUrl));
     }
 
-    private class ScanTask extends RecursiveTask<Void> {
+    private class ScanTask extends RecursiveAction {
         private final String url;
 
         public ScanTask(String url) {
@@ -31,8 +31,8 @@ public class WebScan {
         }
 
         @Override
-        protected Void compute() {
-            if (links.contains(url)) return null; // avoid duplicates
+        protected void compute() {
+            if (links.contains(url)) return; // avoid duplicates
 
             links.add(url);
             Set<ScanTask> subTasks = new HashSet<>();
@@ -53,8 +53,6 @@ public class WebScan {
             for (ScanTask task : subTasks) {
                 task.join();
             }
-
-            return null;
         }
     }
 
